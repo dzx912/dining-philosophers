@@ -8,4 +8,8 @@ public interface Philosopher extends Runnable {
     void eat();
 
     void think();
+
+    int getNumber();
+
+    void finish();
 }
