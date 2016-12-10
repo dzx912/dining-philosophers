@@ -25,7 +25,7 @@ public class ForkSimple implements Fork {
     }
 
     @Override
-    public void get() {
+    public void get() throws PhilosopherException {
         LOGGER.info("Getting fork " + number);
         if (busy) {
             throw new PhilosopherException("Fork " + number + " is already get");
@@ -34,7 +34,7 @@ public class ForkSimple implements Fork {
     }
 
     @Override
-    public void put() {
+    public void put() throws PhilosopherException {
         LOGGER.info("Putting fork " + number);
         if (!busy) {
             throw new PhilosopherException("Fork " + number + " is already put");

@@ -25,18 +25,15 @@ public class PhilosopherSimple extends AbstractPhilosopher {
     private int countEat;
     private boolean correctThread;
 
-    private volatile boolean work;
-
     public PhilosopherSimple(Fork leftFork, Fork rightFork) {
         super(leftFork, rightFork);
         countStarved = 0;
         countEat = 0;
-        work = true;
         correctThread = true;
     }
 
     @Override
-    public void eat() {
+    public void eat() throws PhilosopherException, InterruptedException {
         synchronized (COMMON_TOTEM) {
             boolean forksBusy = getLeftFork().isBusy() || getRightFork().isBusy();
             if (forksBusy) {
@@ -59,7 +56,7 @@ public class PhilosopherSimple extends AbstractPhilosopher {
     }
 
     @Override
-    public void think() {
+    public void think() throws InterruptedException {
         sleep();
     }
 
@@ -73,30 +70,27 @@ public class PhilosopherSimple extends AbstractPhilosopher {
 
     @Override
     public void finish() {
-        work = false;
     }
 
-    private void sleep() {
-        try {
-            Thread.sleep(random.nextInt(MAX_DELAY));
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    private void sleep() throws InterruptedException {
+        Thread.sleep(random.nextInt(MAX_DELAY));
     }
 
     @Override
     public void run() {
         try {
-            while (work) {
-                eat();
-                sleep();
+            try {
+                while (!Thread.currentThread().isInterrupted()) {
+                    eat();
+                    sleep();
+                }
+            } catch (PhilosopherException e) {
+                e.printStackTrace();
+                correctThread = false;
             }
-        } catch (PhilosopherException e) {
-            e.printStackTrace();
-            correctThread = false;
+        } catch (InterruptedException ignore) {
+        } finally {
+            print();
         }
-        while (work) {
-        }
-        print();
     }
 }

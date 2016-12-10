@@ -5,9 +5,9 @@ package org.example.concurrency.dining.philosophers;
  * @since 20.11.16.
  */
 public interface Philosopher extends Runnable {
-    void eat();
+    void eat() throws PhilosopherException, InterruptedException;
 
-    void think();
+    void think() throws InterruptedException;
 
     int getNumber();
 

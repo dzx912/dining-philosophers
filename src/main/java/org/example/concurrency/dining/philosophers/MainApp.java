@@ -1,5 +1,7 @@
 package org.example.concurrency.dining.philosophers;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.example.concurrency.dining.philosophers.simple.ForkSimple;
 import org.example.concurrency.dining.philosophers.simple.PhilosopherSimple;
 
@@ -12,8 +14,11 @@ import java.util.stream.Collectors;
  * @since 20.11.16.
  */
 public class MainApp {
-    private final static int TIME_EXPERIMENT = 60 * 1000;
+    private final static int TIME_EXPERIMENT = 5 * 1000;
     private final static int COUNT_PHILOSOPHERS = 5;
+
+    private static final Logger LOGGER = LogManager.getLogger(MainApp.class);
+
 
     public static void main(String[] args) {
         System.out.println("Start Dining philosophers");
@@ -33,7 +38,10 @@ public class MainApp {
             e.printStackTrace();
         }
 
-        philosophers.forEach(Philosopher::finish);
+        LOGGER.info("Shutdown all threads");
+
+        //TODO: use Callable interface for statistics
+        philosopherThreads.forEach(Thread::interrupt);
     }
 
     private static List<Philosopher> createSimplePhilosophers() {
