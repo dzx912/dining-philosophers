@@ -1,5 +1,6 @@
 package org.example.concurrency.dining.philosophers.simple;
 
+import net.jcip.annotations.GuardedBy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.concurrency.dining.philosophers.AbstractPhilosopher;
@@ -18,7 +19,8 @@ public class PhilosopherSimple extends AbstractPhilosopher {
 
     private final static int MAX_DELAY = 100;
 
-    private final static Object COMMON_TOTEM = new Object();
+    @GuardedBy("this")
+    private static final Object COMMON_TOTEM = new Object();
     private final Random random = new Random();
 
     private int countStarved;
@@ -34,25 +36,28 @@ public class PhilosopherSimple extends AbstractPhilosopher {
 
     @Override
     public void eat() throws PhilosopherException, InterruptedException {
+        String textForks = "[" + getLeftFork().getNumber() + ", " + getRightFork().getNumber() + "]";
         synchronized (COMMON_TOTEM) {
             boolean forksBusy = getLeftFork().isBusy() || getRightFork().isBusy();
             if (forksBusy) {
                 countStarved += 1;
-                LOGGER.info("Forks is busy. Philosopher " + getNumber() + ", starved = " + countStarved);
+                LOGGER.info("Forks " + textForks + " are busy. Philosopher " + getNumber() + ", starved = " + countStarved);
                 return;
             } else {
                 countEat += 1;
-                LOGGER.info("Forks is free. Philosopher " + getNumber() + ", start eat = " + countEat);
+                LOGGER.info("Forks " + textForks + " are free. Philosopher " + getNumber() + ", start eat = " + countEat);
                 getLeftFork().get();
                 getRightFork().get();
             }
         }
 
-        sleep();
-
-        LOGGER.info("Forks is free. Philosopher " + getNumber() + ", finish eat = " + countEat);
-        getLeftFork().put();
-        getRightFork().put();
+        try {
+            sleep();
+        } finally {
+            LOGGER.info("Forks " + textForks + " are free. Philosopher " + getNumber() + ", finish eat = " + countEat);
+            getLeftFork().put();
+            getRightFork().put();
+        }
     }
 
     @Override
@@ -68,10 +73,6 @@ public class PhilosopherSimple extends AbstractPhilosopher {
         }
     }
 
-    @Override
-    public void finish() {
-    }
-
     private void sleep() throws InterruptedException {
         Thread.sleep(random.nextInt(MAX_DELAY));
     }
@@ -82,7 +83,7 @@ public class PhilosopherSimple extends AbstractPhilosopher {
             try {
                 while (!Thread.currentThread().isInterrupted()) {
                     eat();
-                    sleep();
+                    think();
                 }
             } catch (PhilosopherException e) {
                 e.printStackTrace();

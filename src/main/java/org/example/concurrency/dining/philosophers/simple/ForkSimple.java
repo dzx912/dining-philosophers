@@ -17,7 +17,7 @@ public class ForkSimple implements Fork {
 
     private final int number;
 
-    private boolean busy = false;
+    private volatile boolean busy = false;
 
     public ForkSimple() {
         currentNumber += 1;
@@ -45,5 +45,10 @@ public class ForkSimple implements Fork {
     @Override
     public boolean isBusy() {
         return busy;
+    }
+
+    @Override
+    public int getNumber() {
+        return number;
     }
 }

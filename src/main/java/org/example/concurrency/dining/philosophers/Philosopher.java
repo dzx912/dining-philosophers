@@ -10,6 +10,4 @@ public interface Philosopher extends Runnable {
     void think() throws InterruptedException;
 
     int getNumber();
-
-    void finish();
 }

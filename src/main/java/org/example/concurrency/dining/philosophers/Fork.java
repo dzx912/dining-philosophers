@@ -10,4 +10,6 @@ public interface Fork {
     void put() throws PhilosopherException;
 
     boolean isBusy();
+
+    int getNumber();
 }
